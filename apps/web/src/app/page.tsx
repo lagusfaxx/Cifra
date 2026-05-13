@@ -1,7 +1,18 @@
+'use client';
+
+import { useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function HomePage() {
+  const router = useRouter();
+  const isAuth = useAppStore((s) => s.accessToken !== null && s.identityKeys !== null);
+  useEffect(() => {
+    if (isAuth) router.replace('/home');
+  }, [isAuth, router]);
+
   return (
     <main className="min-h-screen flex flex-col">
       <div className="container flex flex-col gap-12 py-16 max-w-2xl">

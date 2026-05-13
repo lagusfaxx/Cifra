@@ -12,6 +12,7 @@ import { loginRouter } from './routes/login.js';
 import { recoverRouter } from './routes/recover.js';
 import { passkeyRouter } from './routes/passkey.js';
 import { usersRouter } from './routes/users.js';
+import { messagesRouter } from './routes/messages.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 
 export function createApp(): Express {
@@ -64,6 +65,7 @@ export function createApp(): Express {
   app.use(recoverRouter);
   app.use(passkeyRouter);
   app.use(usersRouter);
+  app.use(messagesRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -7,6 +7,7 @@ import { disconnectDb, prisma } from './lib/db.js';
 import { disconnectRedis } from './lib/redis.js';
 import { ensureBucket } from './lib/minio.js';
 import { startCleanupJobs } from './jobs/cleanup.js';
+import { setupSocket } from './socket/handler.js';
 
 async function main(): Promise<void> {
   const env = getEnv();
@@ -17,6 +18,7 @@ async function main(): Promise<void> {
 
   const app = createApp();
   const server = createServer(app);
+  setupSocket(server);
 
   server.listen(env.PORT, () => {
     logger.info({ port: env.PORT, env: env.NODE_ENV }, 'cifra-api listening');
