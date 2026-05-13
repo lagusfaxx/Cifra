@@ -7,6 +7,11 @@ import pinoHttp from 'pino-http';
 import { getEnv } from './lib/env.js';
 import { logger } from './lib/logger.js';
 import { healthRouter } from './routes/health.js';
+import { signupRouter } from './routes/signup.js';
+import { loginRouter } from './routes/login.js';
+import { recoverRouter } from './routes/recover.js';
+import { passkeyRouter } from './routes/passkey.js';
+import { usersRouter } from './routes/users.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 
 export function createApp(): Express {
@@ -54,6 +59,11 @@ export function createApp(): Express {
   );
 
   app.use(healthRouter);
+  app.use(signupRouter);
+  app.use(loginRouter);
+  app.use(recoverRouter);
+  app.use(passkeyRouter);
+  app.use(usersRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

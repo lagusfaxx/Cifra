@@ -6,12 +6,14 @@ import { logger } from './lib/logger.js';
 import { disconnectDb, prisma } from './lib/db.js';
 import { disconnectRedis } from './lib/redis.js';
 import { ensureBucket } from './lib/minio.js';
+import { startCleanupJobs } from './jobs/cleanup.js';
 
 async function main(): Promise<void> {
   const env = getEnv();
   await initCrypto();
   await prisma.$connect();
   await ensureBucket();
+  startCleanupJobs();
 
   const app = createApp();
   const server = createServer(app);
