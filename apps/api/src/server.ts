@@ -14,6 +14,7 @@ import { passkeyRouter } from './routes/passkey.js';
 import { usersRouter } from './routes/users.js';
 import { messagesRouter } from './routes/messages.js';
 import { invitesRouter } from './routes/invites.js';
+import { attachmentsRouter } from './routes/attachments.js';
 import { errorHandler, notFoundHandler } from './middleware/error.js';
 
 export function createApp(): Express {
@@ -68,6 +69,7 @@ export function createApp(): Express {
   app.use(usersRouter);
   app.use(messagesRouter);
   app.use(invitesRouter);
+  app.use(attachmentsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
