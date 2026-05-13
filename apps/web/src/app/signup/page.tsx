@@ -179,7 +179,7 @@ export default function SignupPage() {
       setPin2('');
       setPhrase('');
       setStep('done');
-      router.replace('/');
+      router.replace('/onboarding');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Error completando registro');
     } finally {
