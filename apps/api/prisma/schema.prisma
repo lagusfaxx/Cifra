@@ -1,0 +1,196 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  usernameHash  String   @unique
+  emailHash     String   @unique
+  displayName   String
+  identityPub   String
+  signingPub    String
+  encPrivBlob   String
+  encPrivNonce  String
+  pinSalt       String
+  verifierSalt  String
+  pinVerifier   String
+  createdAt     DateTime @default(now())
+  lastSeenAt    DateTime?
+
+  passkeys             Passkey[]
+  sentMessages         Message[]      @relation("sender")
+  receivedMessages     Message[]      @relation("recipient")
+  saveRequestsMade     SaveRequest[]  @relation("requester")
+  saveRequestsReceived SaveRequest[]  @relation("owner")
+  conversationsA       Conversation[] @relation("partA")
+  conversationsB       Conversation[] @relation("partB")
+  invitesCreated       InviteLink[]
+  refreshTokens        RefreshToken[]
+  challenges           AuthChallenge[]
+}
+
+model PendingSignup {
+  id               String   @id @default(cuid())
+  usernameHash     String   @unique
+  emailHash        String   @unique
+  codeHash         String
+  attempts         Int      @default(0)
+  verified         Boolean  @default(false)
+  verificationToken String  @unique
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+model Passkey {
+  id           String   @id @default(cuid())
+  userId       String
+  credentialId String   @unique
+  publicKey    Bytes
+  counter      BigInt   @default(0)
+  transports   String?
+  deviceName   String?
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuthChallenge {
+  id          String   @id @default(cuid())
+  userId      String?
+  purpose     ChallengePurpose
+  challenge   String   @unique
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+enum ChallengePurpose {
+  LOGIN
+  RECOVERY
+  PASSKEY_REGISTER
+  PASSKEY_AUTH
+}
+
+model RefreshToken {
+  id          String   @id @default(cuid())
+  userId      String
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  rotatedAt   DateTime?
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Message {
+  id            String    @id @default(cuid())
+  senderId      String
+  recipientId   String
+  ciphertext    Bytes
+  nonce         Bytes
+  ephemeralPub  Bytes
+  signature     Bytes
+  expiresAt     DateTime
+  deliveredAt   DateTime?
+  readAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  sender        User      @relation("sender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipient     User      @relation("recipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  attachment    Attachment?
+
+  @@index([recipientId, expiresAt])
+  @@index([expiresAt])
+}
+
+model Attachment {
+  id              String   @id @default(cuid())
+  messageId       String   @unique
+  storageKey      String
+  wrappedKey      Bytes
+  wrappedKeyNonce Bytes
+  mimeType        String
+  sizeBytes       Int
+  expiresAt       DateTime
+  saveAllowed     Boolean  @default(false)
+
+  message         Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model SaveRequest {
+  id           String     @id @default(cuid())
+  attachmentId String
+  requesterId  String
+  ownerId      String
+  status       SaveStatus @default(PENDING)
+  createdAt    DateTime   @default(now())
+  resolvedAt   DateTime?
+
+  requester    User       @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  owner        User       @relation("owner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId, status])
+}
+
+enum SaveStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+model Conversation {
+  id              String   @id @default(cuid())
+  participantA    String
+  participantB    String
+  defaultTtl      Int      @default(86400)
+  isVault         Boolean  @default(false)
+  vaultPinHash    String?
+  createdAt       DateTime @default(now())
+
+  userA           User     @relation("partA", fields: [participantA], references: [id], onDelete: Cascade)
+  userB           User     @relation("partB", fields: [participantB], references: [id], onDelete: Cascade)
+
+  @@unique([participantA, participantB])
+}
+
+model InviteLink {
+  id          String    @id @default(cuid())
+  tokenHash   String    @unique
+  inviterId   String
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  inviter     User      @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+}
+
+model AuthAttempt {
+  id            String   @id @default(cuid())
+  usernameHash  String
+  ipHash        String
+  success       Boolean
+  createdAt     DateTime @default(now())
+
+  @@index([usernameHash, createdAt])
+  @@index([ipHash, createdAt])
+}

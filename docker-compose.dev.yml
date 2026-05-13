@@ -1,0 +1,25 @@
+# Override para desarrollo local.
+# Uso: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# Expone puertos, agrega mailhog para SMTP en dev.
+services:
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  minio:
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - cifra-net
+    restart: unless-stopped

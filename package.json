@@ -1,0 +1,27 @@
+{
+  "name": "cifra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "End-to-end encrypted messaging for executives and political professionals",
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "clean": "pnpm -r exec rm -rf dist .next node_modules/.cache",
+    "db:migrate:dev": "pnpm --filter @cifra/api exec prisma migrate dev",
+    "db:generate": "pnpm --filter @cifra/api exec prisma generate",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\""
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.3"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
